@@ -9,7 +9,7 @@ struct Passenger {
 };
 
 // Maximum seats available
-const int MAX_SEATS = 3;
+ int MAX_SEATS;
 
 // Data structures
 vector<Passenger> booked;        // Confirmed passengers
@@ -28,6 +28,7 @@ void bookTicket() {
     if (booked.size() < MAX_SEATS) {
         booked.push_back(p);
         cout << "Ticket Confirmed! Seat allocated.\n";
+        cout << "Passenger ID: " << p.id << "\n";
     } else {
         waitingList.push(p);
         cout << "Seats full! Added to waiting list.\n";
@@ -40,23 +41,45 @@ void cancelTicket() {
     cout << "\nEnter Passenger ID to cancel ticket: ";
     cin >> id;
 
+    // 1️ Check confirmed bookings
     for (int i = 0; i < booked.size(); i++) {
         if (booked[i].id == id) {
             cout << "Ticket cancelled for " << booked[i].name << ".\n";
             booked.erase(booked.begin() + i);
 
-            // Move passenger from waiting list to booked
+            // Move from waiting list to booked
             if (!waitingList.empty()) {
                 Passenger p = waitingList.front();
                 waitingList.pop();
                 booked.push_back(p);
-                cout << "Waiting list passenger " << p.name 
+                cout << "Waiting list passenger " << p.name
                      << " got confirmed seat.\n";
             }
             return;
         }
     }
-    cout << "Passenger ID not found.\n";
+
+    // 2️ Check waiting list
+    queue<Passenger> temp;
+    bool found = false;
+
+    while (!waitingList.empty()) {
+        Passenger p = waitingList.front();
+        waitingList.pop();
+
+        if (p.id == id) {
+            cout << "Waiting list ticket cancelled for " << p.name << ".\n";
+            found = true;
+            continue;
+        }
+        temp.push(p);
+    }
+
+    waitingList = temp;
+
+    if (!found) {
+        cout << "Passenger ID not found.\n";
+    }
 }
 
 // Function to display booked passengers
@@ -90,6 +113,8 @@ void displayWaitingList() {
 
 // Main function
 int main() {
+    cout << "Enter total number of available seats: ";
+    cin >> MAX_SEATS;
     int choice;
 
     do {
